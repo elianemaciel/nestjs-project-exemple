@@ -3,11 +3,20 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ContasModule } from './contas/contas.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     ContasModule,
-    MongooseModule.forRoot('mongodb+srv://eliane:hB8NcHtKEmszBB@cluster0.jxkvgdu.mongodb.net/test')],
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory:  async (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI')
+      }),
+      inject: [ConfigService],
+    }),
+    ],
   controllers: [AppController],
   providers: [AppService],
 })
